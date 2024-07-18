@@ -5,7 +5,8 @@ from logging.handlers import RotatingFileHandler
 from flask import Flask
 
 from .config import Config
-from .controllers import document_bp, document_type_bp
+from .controllers.document_controller import document_bp
+from .controllers.document_type_controller import document_type_bp
 from .extensions import db
 
 

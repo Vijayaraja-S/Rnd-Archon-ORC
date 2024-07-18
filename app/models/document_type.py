@@ -9,4 +9,4 @@ class DocumentType(db.Model):
     document = db.relationship('Document', back_populates='document_type', lazy='dynamic')
 
     def __repr__(self):
-        return f'<DocumentType id={self.id}, template_name={self.template_name}>'
+        return '<DocumentType id={}, template_name={}>'.format(self.id, self.template_name)

@@ -32,3 +32,8 @@ class DocumentTypeService:
             db.session.delete(document_type)
             db.session.commit()
         return document_type
+
+    @staticmethod
+    def filter_document_types(template_name_filter):
+        filter_pattern = '%{}%'.format(template_name_filter)
+        return DocumentType.query.filter(DocumentType.template_name.like(filter_pattern)).all()

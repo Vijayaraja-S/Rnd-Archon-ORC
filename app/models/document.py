@@ -11,4 +11,4 @@ class Document(db.Model):
     document_type = db.relationship("DocumentType", back_populates="document")
 
     def __repr__(self):
-        return f'<Document id={self.id}, template_image={self.template_name} >'
+        return '<DocumentType id={}, template_name={}>'.format(self.id, self.template_name)
