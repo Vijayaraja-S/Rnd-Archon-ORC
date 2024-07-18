@@ -1,4 +1,9 @@
+import math
+
 from flask import Blueprint, request, jsonify
+
+from ..models import DocumentType
+from ..models.beans.response_bean import DocumentTypeInfo, DocumentInfoResponseBean
 from ..services.document_type_service import DocumentTypeService
 import logging
 
@@ -18,6 +23,39 @@ def create_document_type():
     bean = RequestBean(**data)
     document_type = DocumentTypeService.create_document_type(bean)
     return jsonify({'id': document_type.id, 'template_name': document_type.template_name}), 201
+
+
+@document_type_bp.route('/templates', methods=['GET'])
+def get_templates():
+    template_name = request.args.get('template_name', None)
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 10))
+
+    query = DocumentType.query
+
+    if template_name:
+        query = query.filter(DocumentType.template_name.ilike(f'%{template_name}%'))
+
+    total_templates = query.count()
+
+    templates = query.offset((page - 1) * per_page).limit(per_page).all()
+
+    result = []
+    for template in templates:
+        result.append(DocumentTypeInfo(id=template.id, template_name=template.template_name))
+
+    pagination = {
+        'page': page,
+        'per_page': per_page,
+        'total_pages': math.ceil(total_templates / per_page),
+        'total_templates': total_templates
+    }
+
+    response_bean = DocumentInfoResponseBean(pagination=pagination, response=result)
+
+    response_dict = response_bean.model_dump(by_alias=True)
+
+    return jsonify(response_dict)
 
 
 @document_type_bp.route('/document_types/<document_type_id>', methods=['GET'])
@@ -78,4 +116,3 @@ def filter_document_types():
     except Exception as e:
         logger.error("Error occurred while filtering document types: {}".format(str(e)))
         return jsonify({'error': 'Internal server error'}), 500
-

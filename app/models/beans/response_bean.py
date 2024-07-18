@@ -9,6 +9,7 @@ class DocumentTypeInfo(BaseModel):
 
 class DocumentInfoResponseBean(BaseModel):
     response: List[DocumentTypeInfo]
+    pagination: dict
 
 
 class DocumentInfo(BaseModel):
