@@ -6,8 +6,8 @@ from ..extensions import db
 class DocumentService:
 
     @staticmethod
-    def create_document(template_image, columns):
-        document = Document(template_image=template_image, columns=columns)
+    def create_document(image_content, columns):
+        document = Document(template_image=image_content, columns=columns)
         db.session.add(document)
         db.session.commit()
         return document
@@ -17,11 +17,11 @@ class DocumentService:
         return Document.query.get(document_id)
 
     @staticmethod
-    def update_document(document_id, template_image=None, columns=None):
+    def update_document(document_id, image_content=None, columns=None):
         document = Document.query.get(document_id)
         if document:
-            if template_image is not None:
-                document.template_image = template_image
+            if image_content is not None:
+                document.template_image = image_content
             if columns is not None:
                 document.columns = columns
             db.session.commit()
