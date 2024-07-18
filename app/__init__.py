@@ -7,7 +7,10 @@ from flask import Flask
 from .config import Config
 from .controllers.document_controller import document_bp
 from .controllers.document_type_controller import document_type_bp
+from .controllers.fields_controller import fields_bp
 from .extensions import db
+
+
 # from flask_migrate import Migrate
 
 
@@ -32,6 +35,7 @@ def register_extensions(app):
 def register_blueprints(app):
     app.register_blueprint(document_bp, url_prefix='/document_bp')
     app.register_blueprint(document_type_bp, url_prefix='/document_type_bp')
+    app.register_blueprint(fields_bp, url_prefix='/fields_bp')
 
 
 def configure_logging(app):
