@@ -8,12 +8,11 @@ document_bp = Blueprint('document', __name__)
 def create_document():
     data = request.json
     template_image = data.get('template_image')
-    columns = data.get('columns')
 
     if not template_image:
         return jsonify({'error': 'Template image is required'}), 400
 
-    document = DocumentService.create_document(template_image, columns)
+    document = DocumentService.create_document(template_image)
     return jsonify({
         'id': document.id,
         'template_image': document.template_image,

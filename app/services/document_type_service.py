@@ -1,15 +1,19 @@
 from ..models.document_type import DocumentType
 
 from ..extensions import db
+from ..models.beans import RequestBean
+from ..services.document_service import DocumentService
 
 
 class DocumentTypeService:
 
     @staticmethod
-    def create_document_type(template_name):
-        document_type = DocumentType(template_name=template_name)
+    def create_document_type(request_bean: RequestBean):
+        name = request_bean.template_name
+        document_type = DocumentType(template_name=name)
         db.session.add(document_type)
         db.session.commit()
+        DocumentService.save_document_info(request_bean, document_type)
         return document_type
 
     @staticmethod

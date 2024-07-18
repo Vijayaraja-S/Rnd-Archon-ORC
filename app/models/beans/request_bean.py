@@ -3,7 +3,6 @@ from typing import List
 from pydantic import BaseModel
 
 
-# ------------------------------------------------------------------------------------------
 class Position(BaseModel):
     x: int
     y: int
@@ -25,6 +24,3 @@ class RequestBean(BaseModel):
     template_name: str
     image_details: List[ImageDetails]
     field_details: List[FieldDetails]
-
-
-# ------------------------------------------------------------------------------------------
