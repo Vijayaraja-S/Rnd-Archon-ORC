@@ -13,11 +13,11 @@ class DocumentTypeService:
         document_type = DocumentType(template_name=name)
         db.session.add(document_type)
         db.session.commit()
-        DocumentService.save_document_info(request_bean, document_type)
+        DocumentService.save_document_info_init(request_bean, document_type)
         return document_type
 
     @staticmethod
-    def get_document_type(document_type_id):
+    def get_document_type(document_type_id: str):
         return DocumentType.query.get(document_type_id)
 
     @staticmethod
