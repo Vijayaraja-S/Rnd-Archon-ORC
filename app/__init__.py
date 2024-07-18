@@ -8,7 +8,7 @@ from .config import Config
 from .controllers.document_controller import document_bp
 from .controllers.document_type_controller import document_type_bp
 from .extensions import db
-from flask_migrate import Migrate
+# from flask_migrate import Migrate
 
 
 def create_app():
@@ -24,7 +24,7 @@ def create_app():
 
 def register_extensions(app):
     db.init_app(app)
-    migrate = Migrate(app, db)
+    # migrate = Migrate(app, db)
     with app.app_context():
         db.create_all()
 

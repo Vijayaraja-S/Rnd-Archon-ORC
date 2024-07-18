@@ -11,12 +11,14 @@ class Document(db.Model):
     id = db.Column(db.String, primary_key=True, default=lambda: str(uuid.uuid4()))
     image_content = db.Column(db.Text, nullable=True)
     image_name = db.Column(db.String, nullable=True)
-    status=db.Column(db.Enum(DocumentStatus),nullable=True)
-    document_type_id = db.Column(db.String, db.ForeignKey('document_type.id'), unique=False, nullable=False)
-    document_type = db.relationship("DocumentType", back_populates="document")
+    status = db.Column(db.Enum(DocumentStatus), nullable=True)
     created_date = db.Column(DateTime, default=datetime.utcnow)
     modified_date = db.Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    fields = db.relationship("Field", back_populates="document", cascade="all, delete-orphan")
+
+    document_type_id = db.Column(db.String, db.ForeignKey('document_type.id'), unique=False, nullable=False)
+    document_type = db.relationship("DocumentType", back_populates="document")
+
+    document = db.relationship("FieldDocumentMapping", back_populates="document", lazy='dynamic')
 
     def __repr__(self):
         return '<DocumentType id={}, template_name={}>'.format(self.id, self.template_name)
