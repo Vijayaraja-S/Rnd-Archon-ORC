@@ -1,1 +1,1 @@
-from .request_bean import RequestBean, ImageDetails, FieldDetails, Position
+from .request_bean import ImageDetails, FieldDetails, Position, TemplateRequestBean

@@ -1,4 +1,6 @@
 from typing import List
+from uuid import UUID
+
 from pydantic import BaseModel
 
 
@@ -41,3 +43,24 @@ class FieldInfo(BaseModel):
 
 class FieldInfoResponseBean(BaseModel):
     response: List[FieldInfo]
+
+
+#----------------------------------------------------------------------------------------------
+
+
+class TemplateResponse(BaseModel):
+    message: str
+    template_id: UUID
+    template_name: str
+
+
+class TemplateFilterResponse(BaseModel):
+    id: UUID
+    template_name: str
+
+
+class TemplateFilterListResponse(BaseModel):
+    templates: List[TemplateFilterResponse]
+    total: int
+    page: int
+    total_pages: int

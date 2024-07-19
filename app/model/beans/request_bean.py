@@ -18,9 +18,16 @@ class ImageDetails(BaseModel):
 class FieldDetails(BaseModel):
     binding_name: str
     position: Position
+    required: bool
 
 
-class RequestBean(BaseModel):
+class TemplateRequestBean(BaseModel):
     template_name: str
-    image_details: List[ImageDetails]
+    image_content: str
     field_details: List[FieldDetails]
+
+
+class DocumentRequestBean(BaseModel):
+    image_content: str
+    image_name: str
+

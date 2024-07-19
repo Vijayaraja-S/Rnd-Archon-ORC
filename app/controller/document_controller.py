@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 
-from ..model.beans import ImageDetails
+from ..model.beans.request_bean import DocumentRequestBean
 from ..service.document_service import DocumentService
 
 document_bp = Blueprint('document', __name__)
@@ -12,7 +12,7 @@ def create_document(document_type_id):
     if not data:
         return jsonify({'error': 'Template image is required'}), 400
 
-    document = DocumentService.save_document(ImageDetails(**data), document_type_id)
+    document = DocumentService.save_document_info(DocumentRequestBean(**data), document_type_id)
     return jsonify({
         'id': document.id,
         "message": "Document created",

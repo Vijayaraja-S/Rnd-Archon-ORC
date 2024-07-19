@@ -3,8 +3,9 @@ import logging
 from flask import Blueprint, request, jsonify
 
 from ..exception.exceptions import DatabaseError, ServiceError
-from ..model.beans import RequestBean
+from ..model.beans.response_bean import TemplateResponse
 from ..service.document_type_service import DocumentTypeService
+from ..model.beans.request_bean import TemplateRequestBean
 
 document_type_bp = Blueprint('document_type_bp', __name__)
 
@@ -14,12 +15,17 @@ logging.basicConfig(level=logging.INFO)
 
 @document_type_bp.route('/document_types', methods=['POST'])
 def create_document_type():
-    data = request.get_json()
-    if not data:
-        return jsonify({'error': 'Template name is required'}), 400
-    bean = RequestBean(**data)
-    document_type = DocumentTypeService.create_document_type(bean)
-    return jsonify({'id': document_type.id, 'template_name': document_type.template_name}), 201
+    try:
+        request_data = TemplateRequestBean(**request.json)
+        new_template = DocumentTypeService.create_template(request_data)
+        response_data = TemplateResponse(
+            message='Template created successfully',
+            template_id=new_template.id,
+            template_name=new_template.template_name
+        )
+        return jsonify(response_data.model_dump()), 201
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
 
 
 @document_type_bp.route('/templates', methods=['GET'])
@@ -62,18 +68,6 @@ def get_document_type(document_type_id):
         return jsonify({'error': 'Internal server error'}), 500
 
 
-@document_type_bp.route('/document_types/<document_type_id>', methods=['PUT'])
-def update_document_type(document_type_id):
-    data = request.get_json()
-    template_name = data.get('template_name')
-
-    document_type = DocumentTypeService.update_document_type(document_type_id, template_name)
-    if document_type is None:
-        return jsonify({'error': 'Document type not found'}), 404
-
-    return jsonify({'id': document_type.id, 'template_name': document_type.template_name})
-
-
 @document_type_bp.route('/document_types/<document_type_id>', methods=['DELETE'])
 def delete_document_type(document_type_id):
     document_type = DocumentTypeService.delete_document_type(document_type_id)
@@ -81,4 +75,3 @@ def delete_document_type(document_type_id):
         return jsonify({'error': 'Document type not found'}), 404
 
     return jsonify({'result': 'Document type deleted'})
-
