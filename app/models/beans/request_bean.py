@@ -24,3 +24,9 @@ class RequestBean(BaseModel):
     template_name: str
     image_details: List[ImageDetails]
     field_details: List[FieldDetails]
+
+
+class FieldDetailsBuilder(BaseModel):
+    id: str
+    binding_name: str
+    position: Position

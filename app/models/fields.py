@@ -9,7 +9,6 @@ class Fields(db.Model):
     coordinates = db.Column(db.JSON, nullable=True)
 
     document_type_id = db.Column(db.String, db.ForeignKey('document_type.id'), nullable=False, unique=False)
-    document_type = db.relationship("DocumentType", back_populates="field")
 
     field = db.relationship("FieldDocumentMapping", back_populates="fields", lazy='dynamic')
 

@@ -2,7 +2,9 @@ from enum import Enum
 
 
 class DocumentStatus(Enum):
-    REVIEW = 'Review'
+    SCHEDULED = 'SCHEDULED'
+    IN_PROGRESS = 'IN_PROGRESS'
     PROCESSED = 'Processed'
-    ERROR = 'Error'
+    REVIEW = 'Review'
     SKIPPED = 'Skipped'
+    ERROR = 'Error'

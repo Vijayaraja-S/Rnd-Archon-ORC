@@ -16,9 +16,11 @@ class Document(db.Model):
     modified_date = db.Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     document_type_id = db.Column(db.String, db.ForeignKey('document_type.id'), unique=False, nullable=False)
-    document_type = db.relationship("DocumentType", back_populates="document")
 
-    document = db.relationship("FieldDocumentMapping", back_populates="document", lazy='dynamic')
+    field_document_mapping = db.Column(db.String, db.ForeignKey('field_document_mapping.id'), unique=False, nullable=False)
+
+
+
 
     def __repr__(self):
         return '<DocumentType id={}, template_name={}>'.format(self.id, self.template_name)
