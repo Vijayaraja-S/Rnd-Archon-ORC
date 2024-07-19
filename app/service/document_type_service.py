@@ -2,25 +2,15 @@ import math
 
 from sqlalchemy.exc import SQLAlchemyError
 
+from ..exception.exceptions import DatabaseError, ValidationError
+from ..extensions import db
+from ..model.beans.request_bean import TemplateRequestBean
 from ..model.beans.response_bean import DocumentTypeInfo, DocumentInfoResponseBean
 from ..model.document_type import DocumentType
-
-from ..extensions import db
-from ..model.beans import RequestBean
-from ..service.document_service import DocumentService
-from ..exception.exceptions import DatabaseError
+from ..service.fields_service import FieldsService
 
 
 class DocumentTypeService:
-
-    @staticmethod
-    def create_document_type(request_bean: RequestBean):
-        name = request_bean.template_name
-        document_type = DocumentType(template_name=name)
-        db.session.add(document_type)
-        db.session.commit()
-        DocumentService.save_document_info_init(request_bean, document_type)
-        return document_type
 
     @staticmethod
     def get_document_type(document_type_id: str):
@@ -42,11 +32,6 @@ class DocumentTypeService:
             db.session.delete(document_type)
             db.session.commit()
         return document_type
-
-    @staticmethod
-    def filter_document_types(template_name_filter):
-        filter_pattern = '%{}%'.format(template_name_filter)
-        return DocumentType.query.filter(DocumentType.template_name.like(filter_pattern)).all()
 
     @staticmethod
     def get_templates_service(template_name=None, page=1, per_page=10):
@@ -75,3 +60,21 @@ class DocumentTypeService:
 
         except SQLAlchemyError as e:
             raise DatabaseError(f"Database query failed: {str(e)}")
+
+    @staticmethod
+    def create_template(template_data: TemplateRequestBean) -> DocumentType:
+        try:
+            new_template = DocumentType(
+                template_name=template_data.template_name,
+                image=template_data.image_content
+            )
+            db.session.add(new_template)
+            db.session.commit()
+            FieldsService.save_fields_info(template_data.field_details, new_template.id)
+            return new_template
+        except ValidationError as e:
+            db.session.rollback()
+            raise ValueError(f'Validation error: {e}')
+        except Exception as e:
+            db.session.rollback()
+            raise ValueError(f'Database error: {e}')
