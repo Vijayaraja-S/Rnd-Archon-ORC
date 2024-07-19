@@ -2,12 +2,12 @@ import math
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from ..models.beans.response_bean import DocumentTypeInfo, DocumentInfoResponseBean
-from ..models.document_type import DocumentType
+from ..model.beans.response_bean import DocumentTypeInfo, DocumentInfoResponseBean
+from ..model.document_type import DocumentType
 
 from ..extensions import db
-from ..models.beans import RequestBean
-from ..services.document_service import DocumentService
+from ..model.beans import RequestBean
+from ..service.document_service import DocumentService
 from ..exception.exceptions import DatabaseError
 
 

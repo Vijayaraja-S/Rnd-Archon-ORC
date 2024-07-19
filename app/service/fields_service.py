@@ -1,8 +1,8 @@
 import json
 
 from ..extensions import db
-from ..models import DocumentType, Fields
-from ..models.beans import RequestBean
+from ..model import DocumentType, Fields
+from ..model.beans import RequestBean
 
 
 class FieldsService:

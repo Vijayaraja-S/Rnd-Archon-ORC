@@ -1,9 +1,9 @@
 from ..enums.document_status import DocumentStatus
 from ..extensions import db
-from ..models import DocumentType
-from ..models.beans import RequestBean, ImageDetails
-from ..models.document import Document
-from ..services.fields_service import FieldsService
+from ..model import DocumentType
+from ..model.beans import RequestBean, ImageDetails, FieldDetails
+from ..model.document import Document
+from ..service.fields_service import FieldsService
 
 
 class DocumentService:

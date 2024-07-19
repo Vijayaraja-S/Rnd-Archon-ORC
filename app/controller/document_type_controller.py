@@ -1,14 +1,10 @@
-import math
+import logging
 
 from flask import Blueprint, request, jsonify
 
-from ..models import DocumentType
-from ..models.beans.response_bean import DocumentTypeInfo, DocumentInfoResponseBean
-from ..services.document_type_service import DocumentTypeService
-import logging
-
-from ..models.beans import RequestBean
 from ..exception.exceptions import DatabaseError, ServiceError
+from ..model.beans import RequestBean
+from ..service.document_type_service import DocumentTypeService
 
 document_type_bp = Blueprint('document_type_bp', __name__)
 
@@ -86,25 +82,3 @@ def delete_document_type(document_type_id):
 
     return jsonify({'result': 'Document type deleted'})
 
-
-@document_type_bp.route('/document_types', methods=['GET'])
-def filter_document_types():
-    template_name_filter = request.args.get('template_name')
-    if not template_name_filter:
-        return jsonify({'error': 'Template name filter is required'}), 400
-
-    try:
-        document_types = DocumentTypeService.filter_document_types(template_name_filter)
-        if not document_types:
-            return jsonify({'error': 'No document types found with template name containing "{}"'
-                           .format(template_name_filter)}), 404
-
-        result = [{
-            'id': doc.id,
-            'template_name': doc.template_name
-        } for doc in document_types]
-
-        return jsonify(result), 200
-    except Exception as e:
-        logger.error("Error occurred while filtering document types: {}".format(str(e)))
-        return jsonify({'error': 'Internal server error'}), 500

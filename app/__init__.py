@@ -3,11 +3,12 @@ import os
 from logging.handlers import RotatingFileHandler
 
 from flask import Flask
+from flask_cors import CORS
 
 from .config import Config
-from .controllers.document_controller import document_bp
-from .controllers.document_type_controller import document_type_bp
-from .controllers.fields_controller import fields_bp
+from .controller.document_controller import document_bp
+from .controller.document_type_controller import document_type_bp
+from .controller.fields_controller import fields_bp
 from .extensions import db
 
 
@@ -16,6 +17,7 @@ from .extensions import db
 
 def create_app():
     app = Flask(__name__)
+    CORS(app)
     app.config.from_object(Config)
 
     register_extensions(app)

@@ -1,7 +1,7 @@
-from ..services.document_service import DocumentService
 from flask import Blueprint, request, jsonify
 
-from ..models.beans import ImageDetails
+from ..model.beans import ImageDetails
+from ..service.document_service import DocumentService
 
 document_bp = Blueprint('document', __name__)
 
