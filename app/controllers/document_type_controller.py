@@ -8,6 +8,7 @@ from ..services.document_type_service import DocumentTypeService
 import logging
 
 from ..models.beans import RequestBean
+from ..exception.exceptions import DatabaseError, ServiceError
 
 document_type_bp = Blueprint('document_type_bp', __name__)
 
@@ -28,34 +29,25 @@ def create_document_type():
 @document_type_bp.route('/templates', methods=['GET'])
 def get_templates():
     template_name = request.args.get('template_name', None)
-    page = int(request.args.get('page', 1))
-    per_page = int(request.args.get('per_page', 10))
 
-    query = DocumentType.query
+    try:
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 10))
+    except ValueError:
+        return jsonify({"error": "Invalid page or per_page parameter"}), 400
 
-    if template_name:
-        query = query.filter(DocumentType.template_name.ilike(f'%{template_name}%'))
+    page = max(page, 1)
+    per_page = max(per_page, 1)
 
-    total_templates = query.count()
+    try:
+        response_dict = DocumentTypeService.get_templates_service(template_name, page, per_page)
+    except DatabaseError as e:
+        return jsonify(e.to_dict()), e.error_code
+    except ServiceError as e:
+        logging.error(f"Service error: {str(e)}")
+        return jsonify(e.to_dict()), e.error_code
 
-    templates = query.offset((page - 1) * per_page).limit(per_page).all()
-
-    result = []
-    for template in templates:
-        result.append(DocumentTypeInfo(id=template.id, template_name=template.template_name))
-
-    pagination = {
-        'page': page,
-        'per_page': per_page,
-        'total_pages': math.ceil(total_templates / per_page),
-        'total_templates': total_templates
-    }
-
-    response_bean = DocumentInfoResponseBean(pagination=pagination, response=result)
-
-    response_dict = response_bean.model_dump(by_alias=True)
-
-    return jsonify(response_dict)
+    return jsonify(response_dict), 200
 
 
 @document_type_bp.route('/document_types/<document_type_id>', methods=['GET'])

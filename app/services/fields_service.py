@@ -3,7 +3,6 @@ import json
 from ..extensions import db
 from ..models import DocumentType, Fields
 from ..models.beans import RequestBean
-from flask import jsonify
 
 
 class FieldsService:
