@@ -1,12 +1,9 @@
-from ..models import DocumentType
-from ..models.document import Document
-from ..models.beans import RequestBean, ImageDetails
 from ..enums.document_status import DocumentStatus
-
-from ..services.document_type_service import DocumentTypeService
-
-from ..services.fields_service import FieldsService
 from ..extensions import db
+from ..models import DocumentType
+from ..models.beans import RequestBean, ImageDetails
+from ..models.document import Document
+from ..services.fields_service import FieldsService
 
 
 class DocumentService:
@@ -14,11 +11,9 @@ class DocumentService:
     @staticmethod
     def save_document_info_init(request_bean: RequestBean, document_type: DocumentType):
         for doc in request_bean.image_details:
-            """need to add other fields"""
             document = Document(image_content=doc.image_content,
                                 image_name=doc.image_name,
                                 status=DocumentStatus.PROCESSED,
-                                document_type=document_type,
                                 document_type_id=document_type.id)
             db.session.add(document)
             db.session.commit()
@@ -28,12 +23,10 @@ class DocumentService:
 
     @staticmethod
     def save_document(doc: ImageDetails, document_type_id):
-        document_type = DocumentTypeService.get_document_type(document_type_id)
         document = Document(image_content=doc.image_content,
                             image_name=doc.image_name,
                             status=DocumentStatus.PROCESSED,
-                            document_type=document_type,
-                            document_type_id=document_type.id)
+                            document_type_id=document_type_id)
         db.session.add(document)
         db.session.commit()
         return document

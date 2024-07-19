@@ -15,8 +15,7 @@ def create_document(document_type_id):
     document = DocumentService.save_document(ImageDetails(**data), document_type_id)
     return jsonify({
         'id': document.id,
-        'template_image': document.template_image,
-        'columns': document.columns
+        "message": "Document created",
     }), 201
 
 

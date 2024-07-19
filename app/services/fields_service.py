@@ -13,10 +13,9 @@ class FieldsService:
         for field in field_details:
             position = field.position.model_dump()
             dumps = json.dumps(position)
-            # dumps = jsonify(position)
             fields = Fields(binding_name=field.binding_name,
                             coordinates=dumps,
-                            document_type_id=document_type.id,
-                            document_type=document_type)
+                            document_type_id=document_type.id
+                            )
             db.session.add(fields)
             db.session.commit()
