@@ -1,5 +1,4 @@
 import uuid
-
 from ..extensions import db
 
 
@@ -10,9 +9,9 @@ class Fields(db.Model):
     required_field = db.Column(db.Boolean, nullable=False, default=True)
 
     document_type_id = db.Column(db.String, db.ForeignKey('document_type.id'), nullable=False, unique=False)
-    document_type = db.relationship("DocumentType", back_populates="field")
+    document_type = db.relationship('DocumentType', back_populates='fields')
 
-    field = db.relationship("FieldDocumentMapping", back_populates="fields", lazy='dynamic')
-
+    field_document_mapping = db.relationship("FieldDocumentMapping", back_populates="fields",
+                                             uselist=False)
     def __repr__(self):
-        return '<Field id={}, binding_name={}, document_id={}>'.format(self.id, self.binding_name, self.document_id)
+        return '<Field id={}, binding_name={}>'.format(self.id, self.binding_name)

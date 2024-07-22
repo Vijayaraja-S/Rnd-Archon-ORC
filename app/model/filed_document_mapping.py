@@ -1,16 +1,18 @@
 import uuid
-
 from ..extensions import db
 
 
 class FieldDocumentMapping(db.Model):
-    __table_name__ = 'field_document_mapping'
     id = db.Column(db.String, primary_key=True, default=lambda: str(uuid.uuid4()))
     value = db.Column(db.String, nullable=False)
 
-    document_id = db.Column(db.String, db.ForeignKey('document.id'), nullable=False)
-    document = db.relationship('Document', back_populates="document")
+    document_id = db.Column(db.String, db.ForeignKey('document.id'), nullable=False, unique=False)
+    document = db.relationship("Document", back_populates="field_document_mappings", lazy='select')
 
-    field_id = db.Column(db.String, db.ForeignKey('fields.id'), nullable=False)
-    fields = db.relationship('Fields', back_populates="field")
+    field_id = db.Column(db.String, db.ForeignKey('fields.id'), nullable=False,
+                         unique=True)  # unique=True for one-to-one
+    fields = db.relationship('Fields', back_populates='field_document_mapping',
+                             uselist=False)  # uselist=False for one-to-one
 
+    def __repr__(self):
+        return '<FieldDocumentMapping id={}, value={}>'.format(self.id, self.value)

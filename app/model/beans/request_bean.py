@@ -31,3 +31,9 @@ class DocumentRequestBean(BaseModel):
     image_content: str
     image_name: str
 
+
+
+class FieldDetailsBuilder(BaseModel):
+    id: str
+    binding_name: str
+    position: Position

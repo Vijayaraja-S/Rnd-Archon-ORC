@@ -10,6 +10,7 @@ from .controller.document_controller import document_bp
 from .controller.document_type_controller import document_type_bp
 from .controller.fields_controller import fields_bp
 from .extensions import db
+from .scheduler import start_scheduler
 
 
 # from flask_migrate import Migrate
@@ -23,6 +24,8 @@ def create_app():
     register_extensions(app)
     register_blueprints(app)
     configure_logging(app)
+
+    start_scheduler(app)
 
     return app
 

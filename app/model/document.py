@@ -1,10 +1,8 @@
 import uuid
-
-from ..enums.document_status import DocumentStatus
-from ..extensions import db
-
 from datetime import datetime
 from sqlalchemy import DateTime
+from ..enums.document_status import DocumentStatus
+from ..extensions import db
 
 
 class Document(db.Model):
@@ -16,9 +14,10 @@ class Document(db.Model):
     modified_date = db.Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     document_type_id = db.Column(db.String, db.ForeignKey('document_type.id'), unique=False, nullable=False)
-    document_type = db.relationship("DocumentType", back_populates="document")
+    document_type = db.relationship('DocumentType', back_populates='documents')
 
-    document = db.relationship("FieldDocumentMapping", back_populates="document", lazy='dynamic')
+    field_document_mappings = db.relationship('FieldDocumentMapping', back_populates='document',
+                                              lazy='select')
 
     def __repr__(self):
-        return '<DocumentType id={}, template_name={}>'.format(self.id, self.template_name)
+        return '<Document id={}, image_name={}>'.format(self.id, self.image_name)
