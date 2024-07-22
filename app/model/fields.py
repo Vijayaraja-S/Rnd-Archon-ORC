@@ -12,6 +12,7 @@ class Fields(db.Model):
     document_type = db.relationship('DocumentType', back_populates='fields')
 
     field_document_mapping = db.relationship("FieldDocumentMapping", back_populates="fields",
-                                             uselist=False)
+                                             uselist=False, cascade="all, delete-orphan")
+
     def __repr__(self):
         return '<Field id={}, binding_name={}>'.format(self.id, self.binding_name)

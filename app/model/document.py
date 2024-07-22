@@ -17,7 +17,7 @@ class Document(db.Model):
     document_type = db.relationship('DocumentType', back_populates='documents')
 
     field_document_mappings = db.relationship('FieldDocumentMapping', back_populates='document',
-                                              lazy='select')
+                                              lazy='select', cascade='all, delete-orphan')
 
     def __repr__(self):
         return '<Document id={}, image_name={}>'.format(self.id, self.image_name)

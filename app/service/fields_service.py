@@ -1,4 +1,5 @@
 import json
+from typing import List
 
 from ..extensions import db
 from ..model import Fields

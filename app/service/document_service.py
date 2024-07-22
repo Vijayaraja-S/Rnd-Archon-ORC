@@ -1,10 +1,10 @@
+from typing import List
+
 from ..enums.document_status import DocumentStatus
 from ..extensions import db
-from ..models import DocumentType
-from ..models.beans import RequestBean, ImageDetails
-from ..models.document import Document
-from ..services.fields_service import FieldsService
-from typing import List
+from ..model.beans.request_bean import DocumentRequestBean, ImageDetails
+from ..model.document import Document
+
 
 class DocumentService:
 

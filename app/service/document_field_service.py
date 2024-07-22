@@ -1,6 +1,6 @@
 from ..extensions import db
 
-from ..models.filed_document_mapping import FieldDocumentMapping
+from ..model.filed_document_mapping import FieldDocumentMapping
 
 
 class DocumentFieldService:

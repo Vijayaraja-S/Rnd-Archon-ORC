@@ -9,12 +9,12 @@ import numpy as np
 from PIL import Image
 from paddleocr import PaddleOCR
 
-from ..enums import document_status
 from ..enums.document_status import DocumentStatus
-from ..models import Document, Fields
-from ..models.beans import request_bean
-from ..services import FieldsService, DocumentFieldService
-from ..services.document_service import DocumentService
+from ..model import Document, Fields
+from ..model.beans import request_bean
+from ..service import FieldsService
+from ..service.document_field_service import DocumentFieldService
+from ..service.document_service import DocumentService
 
 
 def process_ocr(document: Document, field_details_list):
