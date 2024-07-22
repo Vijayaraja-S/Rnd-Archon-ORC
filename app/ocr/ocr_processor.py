@@ -10,6 +10,7 @@ from PIL import Image
 from paddleocr import PaddleOCR
 
 from ..enums import document_status
+from ..enums.document_status import DocumentStatus
 from ..models import Document, Fields
 from ..models.beans import request_bean
 from ..services import FieldsService, DocumentFieldService
@@ -43,34 +44,35 @@ def init_ocr(document: Document):
         process_ocr(document, field_details_list)
 
     except Exception as e:
-        # Log the exception with the document ID for context
         logging.error(f"Error processing document {document.id}: {e}")
-        # Optionally, you might want to raise the exception or handle it accordingly
         raise
 
 
 def document_process(app):
     print("Process OCR starting...")
     try:
-        with app.app_context():  # Push the application context
-            documents: List[Document] = DocumentService.get_doc_by_status(document_status.DocumentStatus.SCHEDULED)
+        with app.app_context():
+            documents: List[Document] = DocumentService.get_doc_by_status(DocumentStatus.SCHEDULED)
             doc_counts = len(documents)
 
-            if doc_counts > 0:
-                with ThreadPoolExecutor(max_workers=doc_counts) as executor:
-                    futures = []
-                    for doc in documents:
-                        try:
-                            future = executor.submit(init_ocr, doc)
-                            futures.append(future)
-                        except Exception as e:
-                            logging.error(f"Error submitting job for document {doc.id}: {e}")
+            if doc_counts == 0:
+                print("No documents to process.")
+                return
 
-                    for future in futures:
-                        try:
-                            future.result()
-                        except Exception as e:
-                            logging.error(f"Error occurred during processing: {e}")
+            with ThreadPoolExecutor(max_workers=doc_counts) as executor:
+                futures = []
+                for doc in documents:
+                    try:
+                        future = executor.submit(init_ocr, doc)
+                        futures.append(future)
+                    except Exception as e:
+                        logging.error(f"Error submitting job for document {doc.id}: {e}")
+
+                for future in futures:
+                    try:
+                        future.result()
+                    except Exception as e:
+                        logging.error(f"Error occurred during processing: {e}")
 
     except Exception as e:
         logging.error(f"Error in document_process: {e}")

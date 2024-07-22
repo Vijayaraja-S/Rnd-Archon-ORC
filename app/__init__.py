@@ -18,20 +18,17 @@ from .scheduler import start_scheduler
 def create_app():
     app = Flask(__name__)
 
-    # Load configuration
     app.config.from_object(Config)
 
-    # Register extensions and blueprints
     register_extensions(app)
     register_blueprints(app)
 
-    # Configure logging
     configure_logging(app)
 
-    # Start the scheduler
     start_scheduler(app)
 
     return app
+
 
 def register_extensions(app):
     db.init_app(app)

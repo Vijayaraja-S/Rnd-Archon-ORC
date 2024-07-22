@@ -61,7 +61,7 @@ class DocumentService:
     @staticmethod
     def get_doc_by_status(status: DocumentStatus) -> List[Document]:
         try:
-            documents = Document.query.filter_by(status=status).all()
-            return documents
+            status_all = db.session.query(Document).filter(Document.status == status).all()
+            return status_all
         except Exception as e:
             raise e

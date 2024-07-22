@@ -1,13 +1,14 @@
-from apscheduler.schedulers.background import BackgroundScheduler
-from app.ocr.ocr_processor import document_process
 import time
+from apscheduler.schedulers.background import BackgroundScheduler
+
+from app.ocr.ocr_processor import document_process
 
 
 def start_scheduler(app):
     print("Starting scheduler...")
 
     scheduler = BackgroundScheduler()
-    scheduler.add_job(document_process(app), 'interval', seconds=5, max_instances=3)
+    scheduler.add_job(lambda: document_process(app), 'interval', seconds=5, max_instances=3)  # Pass the function itself, not its call
 
     with app.app_context():
         scheduler.start()
