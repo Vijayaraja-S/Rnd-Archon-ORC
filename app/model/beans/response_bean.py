@@ -45,9 +45,6 @@ class FieldInfoResponseBean(BaseModel):
     response: List[FieldInfo]
 
 
-#----------------------------------------------------------------------------------------------
-
-
 class TemplateResponse(BaseModel):
     message: str
     template_id: UUID

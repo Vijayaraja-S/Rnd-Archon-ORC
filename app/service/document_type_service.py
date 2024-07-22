@@ -14,7 +14,10 @@ class DocumentTypeService:
 
     @staticmethod
     def get_document_type(document_type_id: str):
-        return DocumentType.query.get(document_type_id)
+        document_type = DocumentType.query.get(document_type_id)
+        if document_type is None:
+            raise ValueError(f"DocumentType with id {document_type_id} not found")
+        return document_type
 
     @staticmethod
     def update_document_type(document_type_id, template_name=None):

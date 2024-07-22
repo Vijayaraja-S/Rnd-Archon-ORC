@@ -25,7 +25,8 @@ def create_app():
     register_blueprints(app)
     configure_logging(app)
 
-    start_scheduler(app)
+    with app.app_context():
+        start_scheduler(app)
 
     return app
 
