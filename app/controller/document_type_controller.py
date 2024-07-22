@@ -70,8 +70,13 @@ def get_document_type(document_type_id):
 
 @document_type_bp.route('/document_types/<document_type_id>', methods=['DELETE'])
 def delete_document_type(document_type_id):
-    document_type = DocumentTypeService.delete_document_type(document_type_id)
-    if document_type is None:
-        return jsonify({'error': 'Document type not found'}), 404
-
-    return jsonify({'result': 'Document type deleted'})
+    try:
+        document_type = DocumentTypeService.delete_document_type(document_type_id)
+        if document_type is None:
+            return jsonify({'error': 'Document type not found'}), 404
+        return jsonify({'message': 'Document type and associated documents deleted successfully'}), 200
+    except DatabaseError as e:
+        return jsonify({'error': str(e)}), 500
+    except Exception as e:
+        logger.error("Error occurred while deleting DocumentType with id {}: {}".format(document_type_id, str(e)))
+        return jsonify({'error': 'Internal server error'}), 500

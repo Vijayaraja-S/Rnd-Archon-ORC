@@ -27,11 +27,17 @@ class DocumentTypeService:
 
     @staticmethod
     def delete_document_type(document_type_id):
-        document_type = DocumentType.query.get(document_type_id)
-        if document_type:
-            db.session.delete(document_type)
-            db.session.commit()
-        return document_type
+        try:
+            document_type = DocumentType.query.get(document_type_id)
+            if document_type:
+                # template , fields , value
+                db.session.delete(document_type)
+                db.session.commit()
+                return document_type
+            return None
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            raise DatabaseError(f"Database query failed: {str(e)}")
 
     @staticmethod
     def get_templates_service(template_name=None, page=1, per_page=10):
