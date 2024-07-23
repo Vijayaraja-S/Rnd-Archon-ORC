@@ -3,9 +3,9 @@ import logging
 from flask import Blueprint, request, jsonify
 
 from ..exception.exceptions import DatabaseError, ServiceError
+from ..model.beans.request_bean import TemplateRequestBean
 from ..model.beans.response_bean import TemplateResponse
 from ..service.document_type_service import DocumentTypeService
-from ..model.beans.request_bean import TemplateRequestBean
 
 document_type_bp = Blueprint('document_type_bp', __name__)
 
@@ -80,3 +80,13 @@ def delete_document_type(document_type_id):
     except Exception as e:
         logger.error("Error occurred while deleting DocumentType with id {}: {}".format(document_type_id, str(e)))
         return jsonify({'error': 'Internal server error'}), 500
+
+
+@document_type_bp.route('/check_template_exists', methods=['GET'])
+def check_template_exists():
+    template_name = request.args.get('template_name')
+    if not template_name:
+        return jsonify({'error': 'Template name is required'}), 400
+
+    exists = DocumentTypeService.check_template_exists(template_name) is not None
+    return jsonify({'exists': exists})

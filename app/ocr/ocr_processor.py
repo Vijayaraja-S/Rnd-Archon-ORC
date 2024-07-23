@@ -10,8 +10,8 @@ import numpy as np
 from PIL import Image
 from paddleocr import PaddleOCR
 
-from ..extensions import db
 from ..enums.document_status import DocumentStatus
+from ..extensions import db
 from ..model import Document, Fields
 from ..model.beans import request_bean
 from ..service import FieldsService
@@ -68,8 +68,11 @@ def init_ocr(document: Document):
 def process_single_document(doc, app):
     try:
         with app.app_context():
-            init_ocr(doc)
             document = Document.query.filter_by(id=doc.id).first()
+            document.status = DocumentStatus.IN_PROGRESS
+            db.session.add(document)
+            db.session.commit()
+            init_ocr(doc)
             if document:
                 document.status = DocumentStatus.PROCESSED
                 db.session.add(document)

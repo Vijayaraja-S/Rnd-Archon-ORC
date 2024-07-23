@@ -33,7 +33,6 @@ class DocumentTypeService:
         try:
             document_type = DocumentType.query.get(document_type_id)
             if document_type:
-                # template , fields , value
                 db.session.delete(document_type)
                 db.session.commit()
                 return document_type
@@ -71,14 +70,23 @@ class DocumentTypeService:
             raise DatabaseError(f"Database query failed: {str(e)}")
 
     @staticmethod
+    def check_template_exists(template_name: str):
+        return DocumentType.query.filter_by(template_name=template_name).first()
+
+    @staticmethod
     def create_template(template_data: TemplateRequestBean) -> DocumentType:
         try:
+
+            if DocumentTypeService.check_template_exists(template_data.template_name):
+                raise ValueError(f'Template with name {template_data.template_name} already exists.')
+
             new_template = DocumentType(
                 template_name=template_data.template_name,
                 image=template_data.image_content
             )
             db.session.add(new_template)
             db.session.commit()
+
             FieldsService.save_fields_info(template_data.field_details, new_template.id)
             return new_template
         except ValidationError as e:

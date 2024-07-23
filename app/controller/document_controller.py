@@ -36,24 +36,20 @@ def get_document(document_id):
     return jsonify({'error': 'Document not found'}), 404
 
 
-@document_bp.route('/documents', methods=['GET'])
+@document_bp.route('/list_documents', methods=['GET'])
 def list_documents():
-    documents = DocumentService.get_all_documents()
+    try:
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 10))
+        image_name = request.args.get('image_name', None)
+        status = request.args.get('status', None)
 
-    if not documents:
-        return jsonify({'message': 'No documents found'}), 404
+        result = DocumentService.get_all_documents(page, per_page, image_name, status)
 
-    response = [{
-        'id': doc.id,
-        'image_content': doc.image_content,
-        'image_name': doc.image_name,
-        'created_date': doc.created_date,
-        'modified_date': doc.modified_date,
-        'document_type_id': doc.document_type_id
-    } for doc in documents]
+        return jsonify(result)
 
-    return jsonify(response)
-
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 @document_bp.route('/documents/<document_id>', methods=['DELETE'])
@@ -62,3 +58,13 @@ def delete_document(document_id):
     if document:
         return jsonify({'message': 'Document deleted successfully'})
     return jsonify({'error': 'Document not found'}), 404
+
+
+@document_bp.route('/check_document_exists', methods=['GET'])
+def check_document_exists():
+    image_name = request.args.get('image_name')
+    if not image_name:
+        return jsonify({'error': 'Image name is required'}), 400
+
+    exists = DocumentService.check_document_exists(image_name) is not None
+    return jsonify({'exists': exists}), 200

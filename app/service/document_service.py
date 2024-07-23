@@ -1,4 +1,5 @@
-from typing import List
+import math
+from typing import List, Dict
 
 from ..enums.document_status import DocumentStatus
 from ..extensions import db
@@ -12,6 +13,10 @@ class DocumentService:
     @staticmethod
     def save_document(doc: ImageDetails, document_type_id: str) -> Document:
         try:
+
+            if DocumentService.check_document_exists(doc.image_name):
+                raise ValueError(f'Document with name {doc.image_name} already exists')
+
             document = Document(
                 image_content=doc.image_content,
                 image_name=doc.image_name,
@@ -30,13 +35,47 @@ class DocumentService:
         return Document.query.get(document_id)
 
     @staticmethod
-    def get_all_documents() -> List[Document]:
+    def get_all_documents(page: int, per_page: int, image_name: str, status: str) -> Dict[str, any]:
         try:
-            documents = Document.query.all()
-            return documents
+            offset = (page - 1) * per_page
+
+            query = Document.query
+
+            if image_name:
+                query = query.filter(Document.image_name.ilike(f'%{image_name}%'))
+            if status:
+                query = query.filter(Document.status == status)
+
+            total_documents = query.count()
+
+            documents = query.offset(offset).limit(per_page).all()
+
+            response = {
+                'documents': [{
+                    'id': doc.id,
+                    'image_content': doc.image_content,
+                    'image_name': doc.image_name,
+                    'created_date': doc.created_date,
+                    'modified_date': doc.modified_date,
+                    'status': doc.status.value,
+                    'document_type_id': doc.document_type_id
+                } for doc in documents],
+                'total_documents': total_documents,
+                'page': page,
+                'per_page': per_page,
+                'total_pages': math.ceil(total_documents / per_page)
+            }
+
+            return response
         except Exception as e:
             print(f"An error occurred: {e}")
-            return []
+            return {
+                'documents': [],
+                'total_documents': 0,
+                'page': page,
+                'per_page': per_page,
+                'total_pages': 0
+            }
 
     @staticmethod
     def delete_document(document_id: str) -> Document:
@@ -79,3 +118,7 @@ class DocumentService:
             db.session.rollback()
             print(f"Error creating document: {e}")
             raise
+
+    @staticmethod
+    def check_document_exists(image_name: str) -> bool:
+        return Document.query.filter_by(image_name=image_name).first()
