@@ -1,10 +1,15 @@
+import json
 import math
 from typing import List, Dict
+from uuid import UUID
 
 from ..enums.document_status import DocumentStatus
 from ..extensions import db
 from ..model.beans.request_bean import DocumentRequestBean, ImageDetails
+from ..model.beans.response_bean import FieldInfo, Position, ResultsInfoResponse, DocumentInfo, DocumentResponseBean
 from ..model.document import Document
+from ..model.fields import Fields
+from ..model.filed_document_mapping import FieldDocumentMapping
 from ..service.document_type_service import DocumentTypeService
 
 
@@ -31,8 +36,84 @@ class DocumentService:
             raise e
 
     @staticmethod
-    def get_document(document_id: str) -> Document:
-        return Document.query.get(document_id)
+    def get_document_response(document_id):
+        results, fields, document = DocumentService.get_document(document_id)
+
+        def parse_coordinates(coordinates):
+            if isinstance(coordinates, str):
+                try:
+                    return json.loads(coordinates)
+                except json.JSONDecodeError:
+                    return {}
+            return coordinates or {}
+
+        def create_field_info(result, field):
+            coordinates = parse_coordinates(field.coordinates)
+            return FieldInfo(
+                bindingName=field.binding_name,
+                position=Position(
+                    x=coordinates.get('x', 0),
+                    y=coordinates.get('y', 0),
+                    width=coordinates.get('width', 0),
+                    height=coordinates.get('height', 0)
+                ),
+                value=result.value,
+                accuracy=result.accuracy
+            )
+
+        if document:
+            results_response = [ResultsInfoResponse(id=UUID(result.id), value=result.value) for result in results]
+            field_id_map = {field.id: field for field in fields}
+            fields_response = [create_field_info(result, field_id_map.get(result.field_id, {})) for result in results]
+
+            document_response = DocumentInfo(
+                id=document.id,
+                image_name=document.image_name,
+                image_content=document.image_content,
+                createdAt=document.created_date.isoformat(),
+                modifiedAt=document.modified_date.isoformat() if document.modified_date else None,
+                status=document.status
+            )
+
+            return DocumentResponseBean(
+                document_info=[document_response],
+                document_type_id=document.document_type_id,
+                fields=fields_response,
+                results=results_response
+            )
+
+        # Return an empty DocumentResponseBean if no document is found
+        return DocumentResponseBean(
+            document_info=[],
+            document_type_id='',
+            fields=[],
+            results=[]
+        )
+
+    @staticmethod
+    def get_document(document_id: str):
+        results_info = FieldDocumentMapping.query.filter_by(document_id=document_id).all()
+        if results_info is None:
+            print(f"No record found in FieldDocumentMapping with document_id: {document_id}")
+        else:
+            print("results_info:", results_info)
+
+        field_ids = [result.field_id for result in results_info] if results_info else []
+
+        fields_info = Fields.query.filter(Fields.id.in_(field_ids)).all()
+        if fields_info is None:
+            print(f"No fields found in Fields table with document_id: {document_id}")
+        else:
+            print("fields_info:", fields_info)
+
+        document_info = Document.query.get(document_id)
+
+        if document_info is None:
+            print(f"Document with id {document_id} does not exist")
+        else:
+            print("document_info:", document_info)
+
+        return results_info, fields_info, document_info
 
     @staticmethod
     def get_all_documents(page: int, per_page: int, image_name: str, status: str) -> Dict[str, any]:

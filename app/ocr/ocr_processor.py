@@ -130,7 +130,7 @@ def fetch_values_from_paddle_ocr(img, beans, doc_id):
                 accuracy = res[1][1]
                 if accuracy > 0.50:
                     value = res[1][0]
-                    DocumentFieldService.save_field_document_info(bean.id, doc_id, value)
+                    DocumentFieldService.save_field_document_info(bean.id, doc_id, value, accuracy)
 
 
 def retrieve_results(thresh, ocr):

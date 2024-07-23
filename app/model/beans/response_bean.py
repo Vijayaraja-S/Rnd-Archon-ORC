@@ -38,7 +38,7 @@ class FieldInfo(BaseModel):
     bindingName: str
     position: Position
     value: str
-    accuracy: str
+    accuracy: int
 
 
 class FieldInfoResponseBean(BaseModel):
@@ -61,3 +61,15 @@ class TemplateFilterListResponse(BaseModel):
     total: int
     page: int
     total_pages: int
+
+
+class ResultsInfoResponse(BaseModel):
+    id: UUID
+    value: str
+
+
+class DocumentResponseBean(BaseModel):
+    document_info: List[DocumentInfo]
+    document_type_id: UUID
+    fields: List[FieldInfo]
+    results: List[ResultsInfoResponse]
