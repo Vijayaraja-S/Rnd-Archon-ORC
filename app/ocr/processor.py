@@ -8,14 +8,14 @@ from typing import List
 import cv2
 import numpy as np
 from PIL import Image
-from paddleocr import PaddleOCR
 
-from ..extensions import db
+from .ocr_process import OCRProcess
+from .paddleocrprocess import PaddleOcrProcess
 from ..enums.document_status import DocumentStatus
-from ..model import Document, Fields
+from ..extensions import db
+from ..model import Document
 from ..model.beans import request_bean
 from ..service import FieldsService
-from ..service.document_field_service import DocumentFieldService
 from ..service.document_service import DocumentService
 
 
@@ -26,39 +26,45 @@ def fix_base64_padding(base64_string):
     return base64_string
 
 
-def process_ocr(document: Document, field_details_list):
+def process_ocr(document: Document, field_details_list, ocr_processor: OCRProcess):
     image_data = document.image_content
-
     image_data = fix_base64_padding(image_data)
-
     image_data = base64.b64decode(image_data)
-
     image_pil = Image.open(BytesIO(image_data))
     image_pil = image_pil.convert('RGB')
     image_np = np.array(image_pil)
     image_cv = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
 
     doc_id = document.id
-    fetch_values_from_paddle_ocr(image_cv, field_details_list, doc_id)
+    ocr_processor.fetch_values_from_ocr(image_cv, field_details_list, doc_id)
 
 
-def init_ocr(document: Document):
+def choose_ocr_processor(ocr_type: str) -> OCRProcess:
+    ocr_processors = {
+        "paddle": PaddleOcrProcess(),
+    }
+    return ocr_processors.get(ocr_type.lower(), None)
+
+
+def init_ocr(document: Document, ocr_type: str):
     try:
-        list_of_fields: List[Fields] = FieldsService.get_fields_by_doc_type(document.document_type_id)
+        list_of_fields = FieldsService.get_fields_by_doc_type(document.document_type_id)
         field_details_list: List[request_bean.FieldDetailsBuilder] = []
 
         for field in list_of_fields:
             binding_name = field.binding_name
             coordinates = field.coordinates
-
             if isinstance(coordinates, str):
                 coordinates = json.loads(coordinates)
-
             position = request_bean.Position(**coordinates)
             field_details = request_bean.FieldDetailsBuilder(id=field.id, binding_name=binding_name, position=position)
             field_details_list.append(field_details)
 
-        process_ocr(document, field_details_list)
+        ocr_processor = choose_ocr_processor(ocr_type)
+        if ocr_processor:
+            process_ocr(document, field_details_list, ocr_processor)
+        else:
+            logging.error(f"Invalid OCR type: {ocr_type}")
 
     except Exception as e:
         logging.error(f"Error processing document {document.id}: {e}")
@@ -68,13 +74,13 @@ def init_ocr(document: Document):
 def process_single_document(doc, app):
     try:
         with app.app_context():
-            init_ocr(doc)
+            init_ocr(doc, "paddle")
             document = Document.query.filter_by(id=doc.id).first()
             if document:
                 document.status = DocumentStatus.PROCESSED
                 db.session.add(document)
                 db.session.commit()
-            logging.info(f"Document {doc.id} processed successfully")
+            logging.info("Document {doc.id} processed successfully")
     except Exception as e:
         logging.error(f"Error processing document {doc.id}: {e}")
         with app.app_context():
@@ -89,7 +95,7 @@ def document_process(app):
     print("Process OCR starting...")
     try:
         with app.app_context():
-            documents: List[Document] = DocumentService.get_doc_by_status(DocumentStatus.SCHEDULED)
+            documents = DocumentService.get_doc_by_status(DocumentStatus.SCHEDULED)
             doc_counts = len(documents)
 
             if doc_counts == 0:
@@ -106,40 +112,3 @@ def document_process(app):
 
     except Exception as e:
         logging.error(f"Error in document_process: {e}")
-
-
-def start_process(beans, processed_image, document_id):
-    return fetch_values_from_paddle_ocr(processed_image, beans, document_id)
-
-
-def fetch_values_from_paddle_ocr(img, beans, doc_id):
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-    thresh = 255 - cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-
-    ocr = PaddleOCR(use_angle_cls=True, lang='en', use_gpu=False)
-    result = retrieve_results(thresh, ocr)
-
-    for res in result[0]:
-        bbox = res[0]
-        for bean in beans:
-            if is_bounding_box_within(bbox, bean.position) and res[0] and res[1]:
-                accuracy = res[1][1]
-                if accuracy > 0.50:
-                    value = res[1][0]
-                    DocumentFieldService.save_field_document_info(bean.id, doc_id, value)
-
-
-def retrieve_results(thresh, ocr):
-    return ocr.ocr(thresh, cls=True)
-
-
-def is_bounding_box_within(bounding_box, position: request_bean.Position):
-    x1, y1 = bounding_box[0]
-    x2, y2 = bounding_box[3]
-    pos_x = position.x
-    pos_y = position.y
-    pos_width = position.width
-    pos_height = position.height
-
-    return x1 >= pos_x and y1 >= pos_y and x2 <= pos_x + pos_width and y2 <= pos_y + pos_height

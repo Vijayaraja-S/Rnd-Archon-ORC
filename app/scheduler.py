@@ -1,7 +1,7 @@
 import threading
 
 from apscheduler.schedulers.background import BackgroundScheduler
-from app.ocr.ocr_processor import document_process
+from app.ocr.processor import document_process
 
 
 def start_scheduler(app):
